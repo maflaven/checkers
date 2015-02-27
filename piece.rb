@@ -61,16 +61,17 @@ class Piece
 
 	def moves
 		test_board = board.clone
-
+		test_piece = Piece.new(self.team, test_board, self.pos, self.king)
+		
 		slides = []
 		jumps = []
 
 		delta(:slide).each do |delta|
-			slides << possible_slide(delta, test_board)
+			slides << test_piece.possible_slide(delta, test_board)
 		end
 
 		delta(:jump).each do |delta|
-			jumps << possible_jump(delta, test_board)
+			jumps << test_piece.possible_jump(delta, test_board)
 		end
 
 		(slides + jumps).compact
@@ -84,7 +85,7 @@ class Piece
 
 	def valid_move_seq?(destinations)
 		test_board = board.clone
-		test_piece = test_board[self.pos]
+		test_piece = Piece.new(self.team, test_board, self.pos, self.king)
 
 		begin
 			test_piece.perform_moves!(destinations, test_board)
@@ -99,13 +100,16 @@ class Piece
 		self.pos = pos_new
 		board[pos_old] = nil
 		board[pos_new] = self
+		self.promote if board.at_edge_row?(self.pos[0])
 	end
 
 	def possible_slide(delta, board)
 		destination = [self.pos[0] + delta[0], self.pos[1] + delta[1]]
-
-		if board.valid?(destination) && !board.occupied?(destination)
-			return destination
+		
+		if board.valid?(destination)
+			if !board.occupied?(destination)
+				return destination
+			end
 		end
 
 		nil
@@ -114,9 +118,11 @@ class Piece
 	def possible_jump(delta, board)
 		destination = [self.pos[0] + delta[0], self.pos[1] + delta[1]]
 		pos_kill = [self.pos[0] + (delta[0] / 2), self.pos[1] + (delta[1] / 2)]
-
-		if board.valid?(destination) && !board.occupied?(destination) && board[pos_kill].team != self.team
-			return destination
+	
+		if board.valid?(destination) && !(board[pos_kill].nil?)
+		 	if !board.occupied?(destination) && board[pos_kill].team != self.team
+				return destination
+			end
 		end
 
 		nil
@@ -135,9 +141,6 @@ class Piece
 			end
 		elsif destinations.count > 1
 			destinations.each do |destination|
-				debugger
-				puts board.render
-				p destination
 
 				raise InvalidMoveError.new "invalid move #{destination}" unless self.moves.include?(destination)
 
@@ -147,8 +150,6 @@ class Piece
 			end
 		end
 	end
-
-	private
 
 	def delta(move_type)
 		if self.king?
@@ -160,5 +161,9 @@ class Piece
 				move_type == :slide ? BOTTOM_SLIDE : BOTTOM_JUMP
 			end
 		end
-	end	
+	end
+
+	def promote
+		@king = true
+	end
 end

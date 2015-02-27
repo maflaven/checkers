@@ -53,6 +53,10 @@ class Board
 		cloned_board
 	end
 
+	def at_edge_row?(row)
+		row == 0 || row == 7
+	end
+
 	private
 
 	def render_row(row, i)
@@ -113,6 +117,9 @@ if __FILE__ == $PROGRAM_NAME
 	b[[5,1]].perform_slide([-1,-1])
 	b[[2,2]].perform_slide([1, -1])
 	# b[[4,0]].perform_jump([-2,2])
-	puts b[[4,0]].perform_moves([[2,2], [0,4]])
+	b[[4,0]].perform_moves([[2,2], [0,4]])
 	puts b.render
+	b[[0,4]].perform_moves([[1,3]])
+	puts b.render
+	
 end
