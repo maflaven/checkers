@@ -57,6 +57,10 @@ class Board
 		row == 0 || row == 7
 	end
 
+	def pieces
+		@grid.flatten.compact
+	end
+
 	private
 
 	def render_row(row, i)
@@ -105,10 +109,6 @@ class Board
 			end
 		end
 	end
-
-	def pieces
-		@grid.flatten.compact
-	end
 end
 
 if __FILE__ == $PROGRAM_NAME
@@ -121,5 +121,4 @@ if __FILE__ == $PROGRAM_NAME
 	puts b.render
 	b[[0,4]].perform_moves([[1,3]])
 	puts b.render
-	
 end
