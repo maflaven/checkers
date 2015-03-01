@@ -36,11 +36,11 @@ class Board
 	def render
 		render_string = ""
 
-		render_string += "  a  b  c  d  e  f  g  h\n".colorize(:red)
+		render_string += "  0  1  2  3  4  5  6  7\n".colorize(:red)
 
 		@grid.each_with_index { |row, i| render_string += render_row(row, i) }
 
-		render_string += "  a  b  c  d  e  f  g  h\n".colorize(:red)
+		render_string += "  0  1  2  3  4  5  6  7\n".colorize(:red)
 
 		render_string
 	end
@@ -48,7 +48,7 @@ class Board
 	def clone
 		cloned_board = Board.new(false)
 
-		pieces.each { |piece| Piece.new(piece.team, cloned_board, piece.pos.dup) }
+		pieces.each { |piece| Piece.new(piece.team, cloned_board, piece.pos) }
 
 		cloned_board
 	end
@@ -68,11 +68,17 @@ class Board
 
 		render_string += "#{i}".colorize(:red)
 		
-		row.each do |tile|
+		row.each_with_index do |tile, j|
 			if tile.nil?
-				render_string += " _ "
+				if i.even?
+					render_string += "   ".colorize(:background => :white) if j.odd?
+					render_string += "   ".colorize(:background => :black) if j.even?
+				else
+					render_string += "   ".colorize(:background => :white) if j.even?
+					render_string += "   ".colorize(:background => :black) if j.odd?
+				end
 			else
-				render_string += " #{tile.render} "
+				render_string += " #{tile.render} ".colorize(:color => :white, :background => :black)
 			end
 		end
 
@@ -84,6 +90,7 @@ class Board
 
 	def create_starting_grid(fill_board)
 		@grid = Array.new(8) { Array.new(8) }
+
 
 		if fill_board
 			[0, 2].each { |row| populate_row(row, :t, :even) }
@@ -119,6 +126,6 @@ if __FILE__ == $PROGRAM_NAME
 	# b[[4,0]].perform_jump([-2,2])
 	b[[4,0]].perform_moves([[2,2], [0,4]])
 	puts b.render
-	b[[0,4]].perform_moves([[1,3]])
+	b[[0,4]].perform_moves([[1,3], [0,4]])
 	puts b.render
 end

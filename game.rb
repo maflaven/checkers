@@ -1,6 +1,7 @@
 require_relative 'board.rb'
 
 class Game
+	attr_accessor :board
 
 	def initialize
 		@board = Board.new
@@ -9,17 +10,20 @@ class Game
 	def play
 
 		until !!(winner)
+			puts "\ec"
 			display
 			begin
-				get_move_sequence
-			rescue InvalidMoveError => e
-				puts e
+				current_piece = board[get_starting_piece]
+				move_destinations = get_move_sequence
+				current_piece.perform_moves(move_destinations)
+			rescue => e
+				puts "invalid coordinates. try again"
 				retry
-			ensure
-				display
 			end
 		end
-			
+		
+		display
+
 		puts "#{winner} wins!"
 	end
 
@@ -38,30 +42,42 @@ class Game
 		puts @board.render
 	end
 
-	def get_coordinates
+	def get_coordinates(starting)
+		puts "enter destination coordinates (e.g. 3,1), or leave blank" unless starting
+
 		input = gets.chomp.split(',')
 
-		input.map! { |num| num.strip } unless input.nil?
+		return [] if input.empty?
 
-		raise 'invalid coordinates' if @board.valid?(input)
+		input.map! { |num| num.to_i }
 
-		input 
+		raise 'invalid coordinates' if !board.valid?(input)
+
+		input
 	end
 
 	def get_move_sequence
 		move_sequence = []
 
-		begin
-			move = [nil]
-			until move.empty?
-				move = get_coordinates
-				move_sequence << move
-			end
-		rescue => e
-			puts e
-			retry
+		move = [[]]
+		until move.first.nil?
+			move = get_coordinates(false)
+			move_sequence << move
 		end
+
+		move_sequence.delete_if { |el| el.first.nil? }
 
 		move_sequence
 	end
+
+	def get_starting_piece
+		puts "enter starting coordinates (e.g. 2,0)"
+		get_coordinates(true)
+	end
+
+end
+
+if __FILE__ == $PROGRAM_NAME
+	game = Game.new
+	game.play
 end

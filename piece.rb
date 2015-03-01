@@ -18,6 +18,10 @@ class Piece
 
 	KING_JUMP = [[2, 2], [2, -2], [-2, 2], [-2, -2]]
 
+	UNICODE_SYMBOL_PLEBIAN = { t: '⛀', b: '⛂' }
+
+	UNICODE_SYMBOL_KING = { t: '⛁', b: '⛃' }
+
 	def initialize(team, board, pos, king = false)
 		@team = team
 		@board = board
@@ -56,7 +60,11 @@ class Piece
 	end
 
 	def render
-		self.team
+		if king?
+			UNICODE_SYMBOL_KING[team]
+		else
+			UNICODE_SYMBOL_PLEBIAN[team]
+		end
 	end
 
 	def moves
